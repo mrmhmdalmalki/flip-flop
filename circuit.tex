@@ -1,0 +1,63 @@
+% ============================================================
+%  D flip-flop (master-slave, edge-triggered) - logic diagram.
+%  Two D latches in series + one inverter on the clock:
+%     master latch  enable = CLK-bar  (captures D while CLK = 0)
+%     slave  latch  enable = CLK       (passes it out while CLK = 1)
+%  Result: Q takes the value of D on the RISING edge of CLK,
+%  then ignores D until the next edge.
+%  Compile:  pdflatex circuit.tex
+% ============================================================
+\documentclass[border=18pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{amsmath}
+\usetikzlibrary{calc}
+
+\tikzset{dl/.style={thick, rounded corners=2pt, fill=blue!5}}
+
+\begin{document}
+\begin{circuitikz}[line width=1.1pt, font=\sffamily]
+  \ctikzset{logic ports=american, logic ports/thickness=1.1}
+
+  % ---------- master and slave D-latch blocks ----------
+  \draw[dl] (2.8,1.4) rectangle (6.0,4.4);
+  \node[font=\bfseries] at (4.4,3.5) {D latch};
+  \node[font=\footnotesize] at (4.4,2.9) {(master)};
+  \draw[dl] (9.4,1.4) rectangle (12.6,4.4);
+  \node[font=\bfseries] at (11.0,3.5) {D latch};
+  \node[font=\footnotesize] at (11.0,2.9) {(slave)};
+
+  % port stubs + labels for the two latch boxes
+  \foreach \bx/\by in {2.8/0, 9.4/0}{
+    \node[anchor=west,font=\footnotesize] at (\bx+0.1,3.8) {D};
+    \node[anchor=west,font=\footnotesize] at (\bx+0.1,2.0) {E};
+  }
+  \node[anchor=east,font=\footnotesize] at (5.9,3.8) {Q};
+  \node[anchor=east,font=\footnotesize] at (12.5,3.8) {Q};
+  \node[anchor=east,font=\footnotesize] at (12.5,2.0) {$\overline{\mathrm Q}$};
+
+  % ---------- D input ----------
+  \draw (1.0,3.8) node[ocirc]{} node[left]{$D$} -- (2.8,3.8);
+
+  % ---------- master Q -> slave D ----------
+  \draw (6.0,3.8) -- (9.4,3.8);
+  \node[anchor=south,font=\footnotesize] at (7.7,3.85) {$Q_{\mathrm{master}}$};
+
+  % ---------- slave outputs Q, Qbar ----------
+  \draw (12.6,3.8) -- (14.4,3.8) node[ocirc]{} node[right]{$Q$};
+  \draw (12.6,2.0) -- (14.4,2.0) node[ocirc]{} node[right]{$\overline{Q}$};
+
+  % ---------- clock + inverter ----------
+  \node[not port] (inv) at (2.3,-1.0) {};
+  \node[below=1pt,font=\scriptsize] at (inv.south) {clock inverter};
+  \draw (-0.4,-1.0) node[ocirc]{} node[left]{CLK} -- (0.2,-1.0) coordinate(clk);
+  \fill (clk) circle (2pt);
+  \draw (clk) -- (inv.in);
+  % CLK-bar -> master E
+  \draw (inv.out) -- (2.6,-1.0) -- (2.6,2.0) -- (2.8,2.0);
+  \node[anchor=west,font=\footnotesize] at (2.65,0.6) {$\overline{\mathrm{CLK}}$};
+  % CLK -> slave E
+  \draw (clk) -- (0.2,0.6) -- (9.0,0.6) -- (9.0,2.0) -- (9.4,2.0);
+  \node[anchor=south,font=\footnotesize] at (6.5,0.62) {CLK};
+
+\end{circuitikz}
+\end{document}

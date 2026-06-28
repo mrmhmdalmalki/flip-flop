@@ -1,0 +1,54 @@
+% ============================================================
+%  D flip-flop - board-level wiring diagram.
+%  Two finished D-latch boards in series + one NOT board on the clock.
+%  (Each D-latch board is itself four NAND boards.)
+%  master enable = CLK-bar, slave enable = CLK.
+%  Compile:  pdflatex wiring.tex
+% ============================================================
+\documentclass[border=16pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\tikzset{brd/.style={thick, rounded corners=3pt, fill=blue!6}}
+
+\begin{document}
+\begin{tikzpicture}[line width=1.1pt, font=\sffamily]
+
+  % ---------- two D-latch boards ----------
+  \draw[brd] (3.0,1.4) rectangle (6.4,4.2);
+  \node[font=\bfseries] at (4.7,3.3) {D-latch board};
+  \node[font=\footnotesize] at (4.7,2.5) {(master)};
+  \draw[brd] (9.6,1.4) rectangle (13.0,4.2);
+  \node[font=\bfseries] at (11.3,3.3) {D-latch board};
+  \node[font=\footnotesize] at (11.3,2.5) {(slave)};
+
+  \node[anchor=west,font=\footnotesize] at (3.1,3.7){D}; \node[anchor=west,font=\footnotesize] at (3.1,1.9){E};
+  \node[anchor=west,font=\footnotesize] at (9.7,3.7){D}; \node[anchor=west,font=\footnotesize] at (9.7,1.9){E};
+  \node[anchor=east,font=\footnotesize] at (6.3,3.7){Q};
+  \node[anchor=east,font=\footnotesize] at (12.9,3.7){Q}; \node[anchor=east,font=\footnotesize] at (12.9,1.9){$\overline{\mathrm Q}$};
+
+  % ---------- D input, master Q -> slave D, outputs ----------
+  \draw (-1.2,3.7) node[ocirc]{} node[left]{$D$} -- (3.0,3.7);
+  \draw (6.4,3.7) -- (9.6,3.7);  \node[anchor=south,font=\footnotesize] at (8.0,3.75){$Q_{\mathrm{master}}$};
+  \draw (13.0,3.7) -- (15.0,3.7) node[ocirc]{} node[right]{$Q$};
+  \draw (13.0,1.9) -- (15.0,1.9) node[ocirc]{} node[right]{$\overline{Q}$};
+
+  % ---------- clock + NOT board ----------
+  \draw[brd] (2.6,-2.4) rectangle (5.0,-0.6);
+  \node[font=\bfseries] at (3.8,-1.2){NOT}; \node[font=\footnotesize] at (3.8,-1.8){board};
+  \draw (-1.2,-1.5) node[ocirc]{} node[left]{CLK} -- (0.4,-1.5) coordinate(clk);
+  \fill (clk) circle (2.4pt);
+  \draw (clk) -- (2.6,-1.5);                                  % CLK -> NOT input
+  \draw (5.0,-1.5) -- (5.0,-0.1) -- (2.4,-0.1) -- (2.4,1.9) -- (3.0,1.9);  % CLK-bar -> master E (around the left)
+  \node[anchor=east,font=\footnotesize] at (2.35,0.7) {$\overline{\mathrm{CLK}}$};
+  \draw (clk) -- (0.4,0.8) -- (8.6,0.8) -- (8.6,1.9) -- (9.6,1.9);  % CLK -> slave E
+  \node[anchor=south,font=\footnotesize] at (7.0,0.82) {CLK};
+
+  \node[anchor=west,font=\footnotesize\itshape,text width=15cm] at (-1.2,-3.2)
+        {Master captures $D$ while CLK\,=\,0; the slave passes it out on the rising edge.
+         Each D-latch board is itself four NAND boards (see the d-latch folder). Power pins
+         left out: every board also connects to +5\,V and GND.};
+
+\end{tikzpicture}
+\end{document}
